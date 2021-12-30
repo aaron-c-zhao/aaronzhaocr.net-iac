@@ -27,3 +27,8 @@ variable "managed_by" {
   type        = string
   description = "email address of the admin"
 }
+
+variable "bucket_names" {
+  type        = map(string)
+  description = "Name of the buckets"
+}

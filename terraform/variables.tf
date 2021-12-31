@@ -9,7 +9,7 @@ variable "site_version" {
 }
 
 variable "sans" {
-  type        = list(string)
+  type        = map(string)
   description = "list of subject alternative names for the site"
 }
 

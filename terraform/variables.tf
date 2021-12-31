@@ -32,3 +32,8 @@ variable "bucket_names" {
   type        = map(string)
   description = "Name of the buckets"
 }
+
+variable "github_actions_execution_role_arn" {
+  type        = string
+  description = "The export name of the github actions execution role arn"
+}

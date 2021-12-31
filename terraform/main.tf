@@ -17,6 +17,8 @@ resource "aws_acm_certificate" "site_domains" {
 module "s3_bucket" {
   source = "./s3_bucket"
 
+  github_actions_execution_role_arn = var.github_actions_execution_role_arn
+
   s3_buckets = {
     "prod_bucket" = {
       bucket_name                   = var.bucket_names["prod_bucket"]

@@ -67,7 +67,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     }
   */
 
-  aliases = [var.sans["blog_domain"], var.domain]
+  aliases = [var.sans["blog_domain"], var.sans["prod_domain"], var.domain]
 
   default_cache_behavior {
     # all methods will be processed by cloudfront

@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "DO NOT DELETE - Deploy a backend s3 bucket for terraform templates"
+# StackName: aaronzhaocr-net-backend
+
+Resources:
+  BackendS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: "AES256"
+      BucketName: personal-blog-terraform-backend-bucket
+      VersioningConfiguration:
+        Status: Enabled
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackendS3Bucket
+      PolicyDocument: !Sub |
+        {
+          "Version": "2012-10-17",
+          "Id": "PutObjectPolicy",
+          "Statement": [
+            {
+              "Sid": "DenyIncorrectEncryptionHeader",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": "arn:aws:s3:::${BackendS3Bucket}/*",
+              "Condition": {
+                "StringNotEquals": {
+                  "s3:x-amz-server-side-encryption": "AES256"
+                }
+              }
+            },
+            {
+              "Sid": "DenyUnencryptedObjectUploads",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": "arn:aws:s3:::${BackendS3Bucket}/*",
+              "Condition": {
+                "Null": {
+                  "s3:x-amz-server-side-encryption": "true"
+                }
+              }
+            }
+          ]
+        }

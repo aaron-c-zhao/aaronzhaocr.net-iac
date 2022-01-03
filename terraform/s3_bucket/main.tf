@@ -21,7 +21,12 @@ EOF
   }
 }
 
-# TODO: restric access
+
+data "aws_cloudformation_export" "role_arn" {
+  name = var.github_actions_execution_role_arn
+}
+
+
 # bucket policy: allow all principals to get object from bucket
 # even though this is a iam_policy it can still be used as a bucket policy
 # as long as principals presents in the policy
@@ -36,6 +41,28 @@ data "aws_iam_policy_document" "allow_public_access_to_bucket" {
     actions = ["s3:GetObject"]
 
     resources = ["${each.value.arn}/*"]
+  }
+
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_cloudformation_export.role_arn.value]
+    }
+
+    actions = ["s3:PutObject", "s3:DeleteObject"]
+
+    resources = ["${each.value.arn}/*"]
+  }
+
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = [data.aws_cloudformation_export.role_arn.value]
+    }
+
+    actions = ["s3:ListBucket"]
+
+    resources = ["${each.value.arn}"]
   }
 }
 

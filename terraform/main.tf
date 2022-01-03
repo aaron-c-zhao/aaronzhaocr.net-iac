@@ -23,7 +23,7 @@ module "s3_bucket" {
     "prod_bucket" = {
       bucket_name                   = var.bucket_names["prod_bucket"]
       allowed_principal_type        = "AWS"
-      allowed_principal_identifiers = [aws_cloudfront_origin_access_identity.s3_oai.iam_arn]
+      allowed_principal_identifiers = ["*"]
     }
     "stage_bucket" = {
       bucket_name                   = var.bucket_names["stage_bucket"]
@@ -47,11 +47,14 @@ resource "aws_cloudfront_origin_access_identity" "s3_oai" {
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name = module.s3_bucket.buckets["prod_bucket"].bucket_regional_domain_name
+    domain_name = module.s3_bucket.buckets["prod_bucket"].website_endpoint
     origin_id   = local.s3_origin_id
 
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.s3_oai.cloudfront_access_identity_path
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1.1"]
     }
   }
 
@@ -60,6 +63,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   comment             = "CDN for the site"
   default_root_object = "index.html"
 
+  custom_error_response {
+    error_code         = 404
+    response_code      = 404
+    response_page_path = "404.html"
+  }
   # TODO: include log config
   /*
     logging_config {
